@@ -102,22 +102,22 @@ export interface Connection extends EscapeFunctions, events.EventEmitter {
     changeUser(options: ConnectionOptions, callback?: (err: MysqlError) => void): void;
     changeUser(callback: (err: MysqlError) => void): void;
 
-    beginTransaction(options?: QueryOptions, callback?: (err: MysqlError) => void): void;
+    beginTransaction(options?: SequenceOptions, callback?: (err: MysqlError) => void): void;
 
     beginTransaction(callback: (err: MysqlError) => void): void;
 
-    commit(options?: QueryOptions, callback?: (err: MysqlError) => void): void;
+    commit(options?: SequenceOptions, callback?: (err: MysqlError) => void): void;
     commit(callback: (err: MysqlError) => void): void;
 
-    rollback(options?: QueryOptions, callback?: (err: MysqlError) => void): void;
+    rollback(options?: SequenceOptions, callback?: (err: MysqlError) => void): void;
     rollback(callback: (err: MysqlError) => void): void;
 
     query: QueryFunction;
 
-    ping(options?: QueryOptions, callback?: (err: MysqlError) => void): void;
+    ping(options?: SequenceOptions, callback?: (err: MysqlError) => void): void;
     ping(callback: (err: MysqlError) => void): void;
 
-    statistics(options?: QueryOptions, callback?: (err: MysqlError) => void): void;
+    statistics(options?: SequenceOptions, callback?: (err: MysqlError) => void): void;
     statistics(callback: (err: MysqlError) => void): void;
 
     /**
@@ -126,7 +126,7 @@ export interface Connection extends EscapeFunctions, events.EventEmitter {
      * @param callback Handler for any fatal error
      */
     end(callback?: (err?: MysqlError) => void): void;
-    end(options: any, callback: (err?: MysqlError) => void): void;
+    end(options: SequenceOptions, callback: (err?: MysqlError) => void): void;
 
     /**
      * Close the connection immediately, without waiting for any queued data (eg
@@ -310,7 +310,17 @@ export interface QueryFunction {
     (options: string | QueryOptions, values: any, callback?: queryCallback): Query;
 }
 
-export interface QueryOptions {
+export interface SequenceOptions {
+    /**
+     * Every operation takes an optional inactivity timeout option. This allows you to specify appropriate timeouts for
+     * operations. It is important to note that these timeouts are not part of the MySQL protocol, and rather timeout
+     * operations through the client. This means that when a timeout is reached, the connection it occurred on will be
+     * destroyed and no further operations can be performed.
+     */
+    timeout?: number;
+}
+
+export interface QueryOptions extends SequenceOptions {
     /**
      * The SQL for the query
      */
@@ -320,14 +330,6 @@ export interface QueryOptions {
      * Values for template query
      */
     values?: any;
-
-    /**
-     * Every operation takes an optional inactivity timeout option. This allows you to specify appropriate timeouts for
-     * operations. It is important to note that these timeouts are not part of the MySQL protocol, and rather timeout
-     * operations through the client. This means that when a timeout is reached, the connection it occurred on will be
-     * destroyed and no further operations can be performed.
-     */
-    timeout?: number;
 
     /**
      * Either a boolean or string. If true, tables will be nested objects. If string (e.g. '_'), tables will be
